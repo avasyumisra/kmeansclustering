@@ -1,0 +1,169 @@
+To perform customer segmentation using K-Means clustering in Python, you can follow these steps:
+
+### Step 1: Install Necessary Libraries
+
+First, ensure you have the required libraries installed. You can install them using pip if you haven't already:
+
+```bash
+pip install pandas numpy matplotlib seaborn scikit-learn
+```
+
+### Step 2: Import Libraries
+
+Import the necessary libraries:
+
+```python
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+```
+
+### Step 3: Load and Explore the Data
+
+Load your customer data into a DataFrame. For example, let's assume you have a CSV file named `customers.csv`:
+
+```python
+# Load the data
+data = pd.read_csv('customers.csv')
+
+# Explore the data
+print(data.head())
+print(data.describe())
+```
+
+### Step 4: Preprocess the Data
+
+Preprocessing may include handling missing values, encoding categorical variables, and scaling the data. Here, we will focus on scaling:
+
+```python
+# Select features for clustering
+features = ['Age', 'Annual_Income', 'Spending_Score']
+
+# Extract features from the data
+X = data[features]
+
+# Standardize the features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+```
+
+### Step 5: Determine the Optimal Number of Clusters
+
+Use the Elbow Method to determine the optimal number of clusters:
+
+```python
+# Elbow method to find the optimal number of clusters
+wcss = []  # Within-cluster sum of squares
+
+for i in range(1, 11):
+    kmeans = KMeans(n_clusters=i, init='k-means++', max_iter=300, n_init=10, random_state=0)
+    kmeans.fit(X_scaled)
+    wcss.append(kmeans.inertia_)
+
+# Plot the Elbow Method
+plt.figure(figsize=(10, 6))
+plt.plot(range(1, 11), wcss, marker='o', linestyle='--')
+plt.title('Elbow Method')
+plt.xlabel('Number of Clusters')
+plt.ylabel('WCSS')
+plt.show()
+```
+
+### Step 6: Apply K-Means Clustering
+
+Based on the Elbow Method plot, choose the optimal number of clusters (e.g., K=5):
+
+```python
+# Apply K-Means
+kmeans = KMeans(n_clusters=5, init='k-means++', max_iter=300, n_init=10, random_state=0)
+clusters = kmeans.fit_predict(X_scaled)
+
+# Add the cluster assignments to the original data
+data['Cluster'] = clusters
+```
+
+### Step 7: Visualize the Clusters
+
+Visualize the clusters to understand the segmentation:
+
+```python
+# Visualize the clusters
+plt.figure(figsize=(10, 6))
+sns.scatterplot(data=data, x='Annual_Income', y='Spending_Score', hue='Cluster', palette='Set1')
+plt.title('Customer Segments')
+plt.xlabel('Annual Income')
+plt.ylabel('Spending Score')
+plt.legend(title='Cluster')
+plt.show()
+```
+
+### Step 8: Analyze the Clusters
+
+Analyze the characteristics of each cluster:
+
+```python
+# Analyze the clusters
+cluster_analysis = data.groupby('Cluster').mean()
+print(cluster_analysis)
+```
+
+### Full Code Example
+
+Here is the complete code:
+
+```python
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+# Load the data
+data = pd.read_csv('customers.csv')
+
+# Select features for clustering
+features = ['Age', 'Annual_Income', 'Spending_Score']
+X = data[features]
+
+# Standardize the features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Elbow method to find the optimal number of clusters
+wcss = []
+for i in range(1, 11):
+    kmeans = KMeans(n_clusters=i, init='k-means++', max_iter=300, n_init=10, random_state=0)
+    wcss.append(kmeans.fit(X_scaled).inertia_)
+
+# Plot the Elbow Method
+plt.figure(figsize=(10, 6))
+plt.plot(range(1, 11), wcss, marker='o', linestyle='--')
+plt.title('Elbow Method')
+plt.xlabel('Number of Clusters')
+plt.ylabel('WCSS')
+plt.show()
+
+# Apply K-Means
+kmeans = KMeans(n_clusters=5, init='k-means++', max_iter=300, n_init=10, random_state=0)
+clusters = kmeans.fit_predict(X_scaled)
+data['Cluster'] = clusters
+
+# Visualize the clusters
+plt.figure(figsize=(10, 6))
+sns.scatterplot(data=data, x='Annual_Income', y='Spending_Score', hue='Cluster', palette='Set1')
+plt.title('Customer Segments')
+plt.xlabel('Annual Income')
+plt.ylabel('Spending Score')
+plt.legend(title='Cluster')
+plt.show()
+
+# Analyze the clusters
+cluster_analysis = data.groupby('Cluster').mean()
+print(cluster_analysis)
+```
+
+This code will help you segment your customers using K-Means clustering and analyze the resulting segments.
